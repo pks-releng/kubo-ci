@@ -8,8 +8,8 @@ image_resource:
 
 inputs:
 - name: kubo-ci
-- name: stemcell
 - name: release
+- name: deployment
 
 outputs:
 - name: compiled-release

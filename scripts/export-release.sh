@@ -10,11 +10,10 @@ source /tmp/local-bosh/director/env
 # stemcell metadata/upload
 #
 
-tar -xzf stemcell/*.tgz $( tar -tzf stemcell/*.tgz | grep 'stemcell.MF' )
-STEMCELL_OS=$( grep -E '^operating_system: ' stemcell.MF | awk '{print $2}' | tr -d "\"'" )
-STEMCELL_VERSION=$( grep -E '^version: ' stemcell.MF | awk '{print $2}' | tr -d "\"'" )
+STEMCELL_VERSION=$(bosh-cli int "deployment/manifests/cfcr.yml" --path /stemcells/0/version)
+STEMCELL_OS=$(bosh-cli int "deployment/manifests/cfcr.yml" --path /stemcells/0/os)
 
-bosh -n upload-stemcell stemcell/*.tgz
+bosh -n upload-stemcell "https://s3.amazonaws.com/bosh-core-stemcells/warden/bosh-stemcell-${STEMCELL_VERSION}-warden-boshlite-ubuntu-trusty-go_agent.tgz"
 
 #
 # release metadata/upload
