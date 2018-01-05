@@ -43,7 +43,7 @@ resources:
   type: git
   source:
     uri: git@github.com:pivotal-cf-experimental/kubo-ci.git
-    branch: master
+    branch: story/154051307
     private_key: ((git-ssh-key))
 
 - name: git-kubo-deployment
