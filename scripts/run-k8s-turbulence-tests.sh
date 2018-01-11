@@ -43,6 +43,11 @@ run_tests() {
 
   local tmpfile=$(mktemp)
   $BASE_DIR/scripts/generate-test-config.sh $environment $deployment > $tmpfile
+
+  if [ -z "$TURBULENCE_API_NOT_IN_DIRECTOR+x" ] && [[ "$TURBULENCE_API_NOT_IN_DIRECTOR" == "1" ]]; then
+    use_turbulence_deployment $tmpfile
+  fi
+
   export CONFIG=$tmpfile
 
   ginkgo -progress -v "$BASE_DIR/src/tests/turbulence-tests/worker_failure"

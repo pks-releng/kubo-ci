@@ -44,6 +44,31 @@ credhub_login() {
     --ca-cert <(bosh-cli int "${environment}/creds.yml" --path="/uaa_ssl/ca") 1>/dev/null
 }
 
+use_turbulence_deployment() {
+  local config_file=$1
+  local new_config
+  local host
+  local password
+  local director_name
+
+  director_name=$(bosh-cli int "${environment}/director.yml" --path="/director_name")
+
+  export BOSH_ENVIRONEMNT=$(bosh-cli int ${environment}/director.yml --path=/internal_ip)
+  export BOSH_CLIENT=admin
+  export BOSH_CLIENT_SECRET=$(bosh-cli int ${environment}/creds.yml --path=/admin_password)
+  export BOSH_CA_CERT=$(bosh-cli int ${environment}/creds.yml --path=/default_ca/ca)
+
+  credhub_login $environment
+
+  host=$(bosh-cli vms -d turbulence --json | jq -r '.Tables[0].Rows | map(select(.vm_type == "api") | .ips)[0]')
+  password=$(credhub get -n "${director_name}/turbulence/turbulence_api_password" | grep )
+  cacert=$(credhub get -n "${director_name}/turbulence/turbulence_api_ca")
+
+  new_config=$(jq ".turbulence.host = '$host' | .turbulence.password = '$password'" "$config_file")
+
+  echo "$new_config" > $config_file
+}
+
 generate_test_config() {
   local environment="$1"
   local deployment="$2"

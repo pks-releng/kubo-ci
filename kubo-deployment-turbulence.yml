@@ -461,7 +461,8 @@ jobs:
     input_mapping:
       gcs-kubo-deployment-pre: gcs-kubo-deployment-tarball-untested
     tags: ['<%= env %>']
-
+  - task: install-turbulence-api
+    file: git-kubo-ci/tasks/install-turbulence-api.yml
   - task: turbulence-tests
     file: git-kubo-ci/tasks/run-k8s-turbulence-tests-ci.yml
     tags: ['<%= env %>']
