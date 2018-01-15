@@ -10,6 +10,7 @@ run:
   path: git-kubo-ci/scripts/update-kubernetes-port.sh
 
 inputs:
+- name: git-kubo-ci
 - name: kubo-lock-pre
 
 outputs:
