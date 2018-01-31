@@ -1,0 +1,13 @@
+- type: replace
+  path: /azs/name=z2?
+  value:
+    cloud_properties:
+      datacenters:
+      - clusters:
+        - pizza-boxes:
+            resource_pool: kubo
+
+- type: replace
+  path: /networks/name=default/subnets/0/azs/1?
+  value: z2
+
