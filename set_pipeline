@@ -62,7 +62,7 @@ main() {
     branch_name="${2:-$branch_name}"
     git_username=$(git config user.email | awk -F'@' '{print $1}' | xargs)
     if [ ! -z "$git_username" ]; then
-      pipeline_name="${pipeline_name}-${git_username}"
+      pipeline_name="${pipeline_name}-mdeliddo"
     else
       echo "Error: couldn't find git config user.email"
       exit 1
