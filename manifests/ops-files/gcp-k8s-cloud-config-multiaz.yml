@@ -1,6 +1,7 @@
 - type: replace
   path: /azs/name=z2?
   value:
+    name: z2
     cloud_properties:
       zone: us-east1-b
 
