@@ -5,6 +5,8 @@
       zone: us-east1-b
 
 - type: replace
-  path: /networks/name=default/subnets/0/azs/1?
-  value: z2
+  path: /networks/name=default/subnets/0/azs?
+  value: [ z1, z2 ]
+- type: remove
+  path: /networks/name=default/subnets/0/az?
 
