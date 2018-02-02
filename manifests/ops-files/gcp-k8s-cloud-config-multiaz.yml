@@ -1,0 +1,10 @@
+- type: replace
+  path: /azs/name=z2?
+  value:
+    cloud_properties:
+      zone: us-east1-b
+
+- type: replace
+  path: /networks/name=default/subnets/0/azs/1?
+  value: z2
+
