@@ -10,6 +10,7 @@ run:
 params:
   DEPLOYMENT_NAME: ci-service
   CONFORMANCE_RESULTS_DIR: ~
+  CONFORMANCE_SPEC_URI: https://raw.githubusercontent.com/cncf/k8s-conformance/master/sonobuoy-conformance.yaml
 
 inputs:
   - name: git-kubo-ci
