@@ -170,6 +170,7 @@ jobs:
     input_mapping: {kubo-lock: kubo-lock-<%= iaas %>-<%= network %>}
     params:
       CONFORMANCE_RESULTS_DIR: e2e-playground-results
+      CONFORMANCE_SPEC_URI: https://gist.githubusercontent.com/iainsproat/36d5f4444b6eaab3cec680c6f6e20b87/raw/1ef20e4622927eeb906f0530148283f8ea6636bf/sonobuoy-e2e.yaml
     ensure:
       put: e2e-playground-results
       params:
