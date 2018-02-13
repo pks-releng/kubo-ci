@@ -10,7 +10,7 @@ BASE_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)
 verify_args() {
   set +e # Cant be set since read returns a non-zero when it reaches EOF
   read -r -d '' usage <<-EOF
-	Usage: $(basename "$0") [-h] environment deployment-name release-tarball results-dir conformance-test-spec-uri
+	Usage: $(basename "$0") [-h] environment deployment-name release-tarball results-dir
 
 	Help Options:
 		-h  show this help text
@@ -29,7 +29,7 @@ verify_args() {
     esac
   done
   shift $((OPTIND - 1))
-  if [[ $# -lt 4 ]]; then
+  if [[ $# -lt 3 ]]; then
     echo "$usage" >&2
     exit 64
   fi
@@ -39,7 +39,6 @@ run_tests() {
   local environment="$1"
   local deployment="$2"
   local results_dir="$3"
-  local spec_uri="$4"
 
   local iaas=$(bosh int "$environment/director.yml" --path='/iaas')
 
@@ -57,7 +56,6 @@ run_tests() {
   export CONFORMANCE_RESULTS_DIR="${results_dir}"
   export CONFORMANCE_RELEASE_VERSION="${release_version}"
   export CONFORMANCE_IAAS="${iaas}"
-  export CONFORMANCE_SPEC_URI="${spec_uri}"
 
   ginkgo -progress -v "$BASE_DIR/src/tests/conformance"
 
