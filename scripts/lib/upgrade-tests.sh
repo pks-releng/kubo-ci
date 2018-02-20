@@ -7,9 +7,8 @@ set_kubeconfig() {
 
 query_loop() {
   local timeout_seconds=10
-  local pid_to_wait="$1"
-  local url="$2"
-  local min_success_rate="${3:-1}"
+  local url="$1"
+  local min_success_rate="${2:-1}"
 
   # output values
   local query_loop_count=0
@@ -21,15 +20,17 @@ query_loop() {
 
   echo "Querying $url while waiting for process with pid $pid_to_wait to finish..."
 
+  trap "determine_success $query_loop_count $query_success_count $min_success_rate" SIGINT
+
   # loop while process is not finished
-  while kill -0 "$pid_to_wait" >/dev/null 2>&1; do
+  set +e
+
+  while true; do
     sleep 1
 
     (( query_loop_count+=1 ))
 
     local timestamp=`date`
-
-    set +e
 
     curl -L --max-time ${timeout_seconds} -IfsS ${url} &> query_loop_last_output.txt
 
@@ -42,9 +43,13 @@ query_loop() {
         echo "[$timestamp][$query_success_count/$query_loop_count] Service $url successfully responded"
       fi
     fi
-
-    set -e
   done
+}
+
+determine_success() {
+  local query_loop_count=$1
+  local query_success_count=$2
+  local min_success_rate=$3
 
   echo "$query_success_count out of $query_loop_count queries succeeded"
 
@@ -102,8 +107,16 @@ run_upgrade_test() {
 
   # exercise the load balancer URL while BOSH is updating
   local query_url="$lb_url"
-  query_loop "$update_pid" "$query_url" "$min_success_rate"
+  query_loop "$query_url" "$min_success_rate" &
+  local query_pid="$!"
 
+  wait $update_pid
+  if [ "$?" != "0" ]; then
+    return 1
+  fi
+
+  kill $query_pid
+  wait $query_pid
   if [ "$?" != "0" ]; then
     return 1
   fi
