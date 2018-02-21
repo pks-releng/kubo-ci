@@ -35,7 +35,7 @@ fi
 
 set_kubeconfig
 run_upgrade_test update_bosh "$HA_MIN_SERVICE_AVAILABILITY" "bosh"
-upload_new_releases
+#upload_new_releases
 run_upgrade_test update_kubo "$HA_MIN_SERVICE_AVAILABILITY" "kubo"
 
 # for Concourse outputs

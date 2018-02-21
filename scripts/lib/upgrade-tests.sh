@@ -6,11 +6,10 @@ set_kubeconfig() {
 }
 
 query_loop() {
-  local timeout_seconds=10
   local url="$1"
-  local min_success_rate="${2:-1}"
+  local min_success_rate="$2"
+  local channel="$3"
 
-  # output values
   local query_loop_count=0
   local query_success_count=0
 
@@ -18,21 +17,22 @@ query_loop() {
   local red='\033[0;31m'
   local no_color='\033[0m'
 
-  echo "Querying $url while waiting for process with pid $pid_to_wait to finish..."
-
-  trap "determine_success $query_loop_count $query_success_count $min_success_rate" SIGINT
 
   # loop while process is not finished
   set +e
 
   while true; do
-    sleep 1
+    if [ -f $channel ]; then
+       echo "File $channel exists."
+       determine_success $query_loop_count $query_success_count $min_success_rate
+       return 0
+    fi
 
     (( query_loop_count+=1 ))
 
     local timestamp=`date`
 
-    curl -L --max-time ${timeout_seconds} -IfsS ${url} &> query_loop_last_output.txt
+    curl -L --max-time 1 -IfsS ${url} &> query_loop_last_output.txt
 
     if [ "$?" -ne 0 ]; then
       echo -e "[$timestamp][$query_success_count/$query_loop_count] ${red}Error: request to $url failed${no_color}"
@@ -43,6 +43,7 @@ query_loop() {
         echo "[$timestamp][$query_success_count/$query_loop_count] Service $url successfully responded"
       fi
     fi
+    sleep 1
   done
 }
 
@@ -63,18 +64,19 @@ determine_success() {
   fi
 }
 
-wait_for_success() {
-  local pid_to_wait="$1"
-  local work_description="$2"
-
-  echo "PID to wait on: $pid_to_wait, for work: $work_description"
-  wait "$pid_to_wait"
-  if [ "$?" -ne 0 ]; then
-    echo "$work_description failed"
-    exit 1
-  fi
-  echo "$work_description succeeded"
-}
+#TODO nobody using it?
+# wait_for_success() {
+#   local pid_to_wait="$1"
+#   local work_description="$2"
+#
+#   echo "PID to wait on: $pid_to_wait, for work: $work_description"
+#   wait "$pid_to_wait"
+#   if [ "$?" -ne 0 ]; then
+#     echo "$work_description failed"
+#     exit 1
+#   fi
+#   echo "$work_description succeeded"
+# }
 
 run_upgrade_test() {
   local service_name="nginx"
@@ -100,14 +102,14 @@ run_upgrade_test() {
   local lb_url="http://$lb_address"
   echo "The load balancer's URL is $lb_url"
 
-  # update BOSH in the background
+  echo "Updating bosh|k8s in the background"
   $update_function &
   local update_pid="$!"
   echo "Update function PID: ${update_pid}"
 
-  # exercise the load balancer URL while BOSH is updating
-  local query_url="$lb_url"
-  query_loop "$query_url" "$min_success_rate" &
+  echo "Querying $lb_url while waiting for process with pid $update_pid to finish..."
+  #TODO. make it random
+  query_loop "$lb_url" "$min_success_rate" /tmp/channel &
   local query_pid="$!"
 
   wait $update_pid
@@ -115,8 +117,9 @@ run_upgrade_test() {
     return 1
   fi
 
-  kill $query_pid
+  touch /tmp/channel
   wait $query_pid
+  rm /tmp/channel
   if [ "$?" != "0" ]; then
     return 1
   fi
