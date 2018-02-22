@@ -115,7 +115,7 @@ var _ = Describe("Conformance Tests", func() {
 })
 
 func GetLatestConformanceSpec() string {
-	resp, err := http.Get("https://raw.githubusercontent.com/cncf/k8s-conformance/master/sonobuoy-conformance.yaml")
+	resp, err := http.Get("https://gist.githubusercontent.com/christianang/b1690d49f62b834e83ac360ed1e59caa/raw/f0cb2f61c4dc241e3068292428e4bdb7362af2e0/sonobuoy-e2e.yaml")
 	Expect(err).NotTo(HaveOccurred())
 	defer resp.Body.Close()
 
